@@ -35,7 +35,7 @@
         .progress-bar {
             height: 30px;
             width: 0;
-            background-color: #000000;
+            background-color: #000;
             border-radius: 10px;
             transition: width 0.5s ease;
         }
@@ -53,7 +53,7 @@
             background-position: center;
         }
         .balance {
-            font-size: 56px; 
+            font-size: 56px;
             font-weight: bold;
             margin: 20px 0;
             color: #000;
@@ -64,22 +64,22 @@
             background-color: #000;
             margin: 20px 0;
             position: relative;
-            display: none; 
+            display: none;
         }
         .deposit {
             display: flex;
             align-items: center;
-            justify-content: flex-start; 
+            justify-content: flex-start;
             font-size: 24px;
             color: #28a745;
             margin-top: 10px;
-            padding-left: 5%; 
+            padding-left: 5%;
         }
         .deposit-icon {
-            width: 9%;
-            height: 9%;
+            width: 30px;
+            height: 30px;
             background-color: #000;
-            border-radius: 15px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -127,13 +127,13 @@
             color: #FFFFFF;
             background-color: #000;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 20px; /* More rounded corners */
             cursor: pointer;
             display: inline-block;
-            margin: 20px 0; 
+            margin: 20px 0;
         }
         .tasks {
-            display: block; /* Задания отображаются сразу */
+            display: none;
             margin: 20px 0;
         }
         .task {
@@ -150,7 +150,7 @@
             background-color: black;
             color: white;
             border: none;
-            border-radius: 20px; /* Увеличено скругление */
+            border-radius: 20px; /* More rounded corners */
             padding: 10px 20px;
             cursor: pointer;
         }
@@ -158,6 +158,10 @@
             background-color: white;
             color: black;
             border: 1px solid black;
+        }
+        .task-link {
+            text-decoration: none;
+            color: black;
         }
     </style>
 </head>
@@ -183,12 +187,10 @@
     <div class="balance"><span id="balance">0</span> $</div>
     <div class="tasks">
         <div class="task">
-            <div>Задание 1</div>
-            <button class="task-button" id="task1-btn">Start</button>
+            <div>Задание 1 <a href="#" class="task-link" id="task1-btn">Start</a></div>
         </div>
         <div class="task">
-            <div>Задание 2</div>
-            <button class="task-button" id="task2-btn">Start</button>
+            <div>Задание 2 <a href="#" class="task-link" id="task2-btn">Start</a></div>
         </div>
     </div>
     <div class="wallet-page">
@@ -213,51 +215,67 @@
     });
 
     const isFirstVisit = !localStorage.getItem('visited');
-    let balance = parseInt(localStorage.getItem('balance')) || 0;
+    const initialReward = 1000; // Reward for first visit
+    const task1Reward = 500; // Reward for task 1
+    const task2Reward = 500; // Reward for task 2
 
-    // Храним состояния заданий
-    const tasksCompleted = JSON.parse(localStorage.getItem('tasksCompleted')) || [false, false];
+    let balance = parseInt(localStorage.getItem('balance')) || 0;
+    let task1Status = parseInt(localStorage.getItem('task1Status')) || 0;
+    let task2Status = parseInt(localStorage.getItem('task2Status')) || 0;
 
     if (isFirstVisit) {
-        balance = Math.floor(Math.random() * 9901) + 100;
+        balance += initialReward;
         localStorage.setItem('balance', balance.toString());
-
-        function fillProgressBar(progressBarId, duration) {
-            const progressBar = document.getElementById(progressBarId);
-            let progress = 0;
-            const interval = setInterval(() => {
-                const increment = Math.random() * 20 + 10;
-                progress += increment;
-                if (progress >= 100) {
-                    progressBar.style.width = '100%';
-                    clearInterval(interval);
-                } else {
-                    progressBar.style.width = `${progress}%`;
-                }
-            }, duration / 20);
-        }
-
-        setTimeout(() => fillProgressBar('progress-bar-1', 3000), 0);
-        setTimeout(() => fillProgressBar('progress-bar-2', 3000), 3000);
-        setTimeout(() => fillProgressBar('progress-bar-3', 3000), 6000);
-
-        setTimeout(() => {
-            document.querySelector('.loading').style.display = 'none';
-            document.querySelector('.app').style.display = 'block';
-            localStorage.setItem('visited', 'true');
-            document.getElementById('balance').textContent = balance;
-            document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
-        }, 9000);
-    } else {
-        document.querySelector('.loading').style.display = 'none';
-        document.querySelector('.app').style.display = 'block';
-        document.getElementById('balance').textContent = balance;
-        document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
+        localStorage.setItem('visited', 'true');
     }
+
+    document.getElementById('balance').textContent = balance;
+    
+    if (task1Status === 0) {
+        document.getElementById('task1-btn').style.display = 'inline';
+    } else if (task1Status === task1Reward) {
+        document.getElementById('deposit-amount').textContent = '+' + task1Reward + ' $ (Task 1)';
+    }
+
+    if (task2Status === 0) {
+        document.getElementById('task2-btn').style.display = 'inline';
+    } else if (task2Status === task2Reward) {
+        document.getElementById('deposit-amount').textContent = '+' + task2Reward + ' $ (Task 2)';
+    }
+
+    document.getElementById('task1-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (task1Status === 0) {
+            balance += task1Reward;
+            task1Status = task1Reward;
+            localStorage.setItem('balance', balance.toString());
+            localStorage.setItem('task1Status', task1Status.toString());
+            alert('Задание 1 выполнено! Вы получили 500 токенов.');
+            document.getElementById('deposit-amount').textContent = '+' + task1Reward + ' $ (Task 1)';
+            document.getElementById('task1-btn').parentElement.innerHTML += ' (Completed)';
+        } else {
+            alert('Это задание уже выполнено!');
+        }
+    });
+
+    document.getElementById('task2-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (task2Status === 0) {
+            balance += task2Reward;
+            task2Status = task2Reward;
+            localStorage.setItem('balance', balance.toString());
+            localStorage.setItem('task2Status', task2Status.toString());
+            alert('Задание 2 выполнено! Вы получили 500 токенов.');
+            document.getElementById('deposit-amount').textContent = '+' + task2Reward + ' $ (Task 2)';
+            document.getElementById('task2-btn').parentElement.innerHTML += ' (Completed)';
+        } else {
+            alert('Это задание уже выполнено!');
+        }
+    });
 
     document.getElementById('home-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.remove('active');
-        document.querySelector('.photo').style.display = 'none'; // Убрали фотографию
+        document.querySelector('.photo').style.display = 'block';
         document.querySelector('.separator').style.display = 'none';
         document.getElementById('ton-connect').style.display = 'none'; 
         document.querySelector('.tasks').style.display = 'block'; 
@@ -269,22 +287,7 @@
         document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
         document.querySelector('.tasks').style.display = 'none'; 
         document.getElementById('ton-connect').style.display = 'block'; 
-    });
-
-    document.getElementById('task1-btn').addEventListener('click', () => {
-        if (!tasksCompleted[0]) {
-            window.open('https://example.com/task1', '_blank'); // Ссылка на задание 1
-        } else {
-            alert('Это задание уже выполнено!');
-        }
-    });
-
-    document.getElementById('task2-btn').addEventListener('click', () => {
-        if (!tasksCompleted[1]) {
-            window.open('https://example.com/task2', '_blank'); // Ссылка на задание 2
-        } else {
-            alert('Это задание уже выполнено!');
-        }
+        document.querySelector('.photo').style.display = 'none'; // Hide photo only in wallet view
     });
 
     document.getElementById('ton-connect').addEventListener('click', async () => {
