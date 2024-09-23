@@ -45,8 +45,15 @@
             background-color: #ffffff;
             position: relative;
         }
+        .photo {
+            width: 100%;
+            height: 40vh;
+            background-image: url('https://github.com/VladisIzm/famichs/blob/main/image.png?raw=true');
+            background-size: cover;
+            background-position: center;
+        }
         .balance {
-            font-size: 56px;
+            font-size: 56px; 
             font-weight: bold;
             margin: 20px 0;
             color: #000;
@@ -57,16 +64,16 @@
             background-color: #000;
             margin: 20px 0;
             position: relative;
-            display: none;
+            display: none; 
         }
         .deposit {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: flex-start; 
             font-size: 24px;
             color: #28a745;
             margin-top: 10px;
-            padding-left: 5%;
+            padding-left: 5%; 
         }
         .deposit-icon {
             width: 9%;
@@ -107,6 +114,9 @@
             display: none;
             padding-top: 20px;
         }
+        .wallet-page.active .deposit-icon {
+            display: flex;
+        }
         .wallet-page.active {
             display: block;
         }
@@ -120,15 +130,15 @@
             border-radius: 5px;
             cursor: pointer;
             display: inline-block;
-            margin: 20px 0;
+            margin: 20px 0; 
         }
         .tasks {
-            display: none;
+            display: block; /* Задания отображаются сразу */
             margin: 20px 0;
         }
         .task {
             background-color: #f0f0f0;
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 20px;
             margin: 10px 0;
             display: flex;
@@ -140,7 +150,7 @@
             background-color: black;
             color: white;
             border: none;
-            border-radius: 15px; /* Увеличенное скругление */
+            border-radius: 20px; /* Увеличено скругление */
             padding: 10px 20px;
             cursor: pointer;
         }
@@ -169,6 +179,7 @@
 </div>
 
 <div class="app">
+    <div class="photo"></div>
     <div class="balance"><span id="balance">0</span> $</div>
     <div class="tasks">
         <div class="task">
@@ -197,8 +208,8 @@
 
 <script>
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://your-app-url.com/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
+        manifestUrl: 'https://github.com/VladisIzm/famichs/blob/main/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect' 
     });
 
     const isFirstVisit = !localStorage.getItem('visited');
@@ -246,41 +257,55 @@
 
     document.getElementById('home-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.remove('active');
-        document.querySelector('.tasks').style.display = 'block'; // Показываем задания на Home
+        document.querySelector('.photo').style.display = 'none'; // Убрали фотографию
+        document.querySelector('.separator').style.display = 'none';
+        document.getElementById('ton-connect').style.display = 'none'; 
+        document.querySelector('.tasks').style.display = 'block'; 
     });
 
     document.getElementById('wallet-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.add('active');
-        document.querySelector('.separator').style.display = 'block';
+        document.querySelector('.separator').style.display = 'block'; 
         document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
-        document.querySelector('.tasks').style.display = 'none'; // Скрываем задания на Wallet
-        document.getElementById('ton-connect').style.display = 'block'; // Показываем кнопку Connect Wallet на Wallet
+        document.querySelector('.tasks').style.display = 'none'; 
+        document.getElementById('ton-connect').style.display = 'block'; 
     });
 
     document.getElementById('task1-btn').addEventListener('click', () => {
         if (!tasksCompleted[0]) {
-            balance += 500;
-            localStorage.setItem('balance', balance.toString());
-            document.getElementById('balance').textContent = balance;
-            tasksCompleted[0] = true;
-            localStorage.setItem('tasksCompleted', JSON.stringify(tasksCompleted));
-            document.getElementById('task1-btn').classList.add('task-completed');
-            document.getElementById('task1-btn').textContent = 'Done';
+            window.open('https://example.com/task1', '_blank'); // Ссылка на задание 1
+        } else {
+            alert('Это задание уже выполнено!');
         }
     });
 
     document.getElementById('task2-btn').addEventListener('click', () => {
         if (!tasksCompleted[1]) {
-            balance += 500;
-            localStorage.setItem('balance', balance.toString());
-            document.getElementById('balance').textContent = balance;
-            tasksCompleted[1] = true;
-            localStorage.setItem('tasksCompleted', JSON.stringify(tasksCompleted));
-            document.getElementById('task2-btn').classList.add('task-completed');
-            document.getElementById('task2-btn').textContent = 'Done';
+            window.open('https://example.com/task2', '_blank'); // Ссылка на задание 2
+        } else {
+            alert('Это задание уже выполнено!');
         }
     });
-    localStorage.clear();
+
+    document.getElementById('ton-connect').addEventListener('click', async () => {
+        try {
+            const connectedWallet = await tonConnectUI.connectWallet();
+            console.log('Кошелек подключен:', connectedWallet);
+            if (connectedWallet) {
+                document.getElementById('ton-connect').textContent = connectedWallet.account.address;
+            }
+        } catch (error) {
+            console.error("Ошибка при подключении кошелька:", error);
+        }
+    });
+
+    tonConnectUI.onStatusChange((wallet) => {
+        if (wallet) {
+            document.getElementById('ton-connect').textContent = wallet.account.address;
+        }
+    });
+
+    tonConnectUI.ready();
 </script>
 
 </body>
