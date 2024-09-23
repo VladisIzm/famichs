@@ -43,6 +43,7 @@
             display: none;
             padding: 20px;
             background-color: #ffffff;
+            position: relative;
         }
         .photo {
             width: 100%;
@@ -52,32 +53,47 @@
             background-position: center;
         }
         .balance {
-            font-size: 32px;
+            font-size: 48px;
+            font-weight: bold;
             margin: 20px 0;
+            color: #000;
+        }
+        .separator {
+            width: 100%;
+            height: 2px;
+            background-color: #000;
+            margin: 20px 0;
+            position: absolute;
+            top: 40%;
+            left: 0;
         }
         .deposit {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             font-size: 24px;
             color: #28a745;
             margin-bottom: 10px;
+            padding-left: 8%;
         }
         .deposit-icon {
+            display: none;
             width: 30px;
             height: 30px;
             background-color: #000;
             border-radius: 50%;
-            display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
             color: #fff;
             font-weight: bold;
+            margin-right: 10px;
         }
         .enter-text {
             font-size: 18px;
             color: #666;
+            text-align: left;
+            padding-left: 8%;
+            margin-top: 5%;
         }
         .menu {
             position: fixed;
@@ -87,7 +103,8 @@
             justify-content: space-around;
             background-color: #fff;
             border-top: 1px solid #ddd;
-            padding: 10px 0;
+            height: 10%;
+            align-items: center;
         }
         .menu button {
             background: none;
@@ -97,9 +114,25 @@
         }
         .wallet-page {
             display: none;
+            padding-top: 20px;
+        }
+        .wallet-page.active .deposit-icon {
+            display: flex;
         }
         .wallet-page.active {
             display: block;
+        }
+        #ton-connect {
+            font-size: 15px;
+            font-weight: 590;
+            line-height: 18px;
+            color: #FFFFFF;
+            background-color: #000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -121,22 +154,18 @@
 </div>
 
 <!-- Элемент для TON Connect UI -->
-<div id="ton-connect"></div>
-
 <div class="app">
     <div class="photo"></div>
-    <div class="balance">Ваш баланс: <span id="balance">0</span> монеток</div>
-    <div class="deposit">
-        <div class="deposit-icon">+</div>
-        <span id="deposit-amount">0</span> монеток
-    </div>
-    <div class="enter-text">Enter</div>
-
+    <div class="balance"><span id="balance">0</span> $</div>
+    <div class="separator"></div>
     <div class="wallet-page">
-        <h2>Баланс: <span id="wallet-balance">0</span> монеток</h2>
-        <button id="link-wallet">Привязать криптокошелек</button>
+        <div class="deposit">
+            <div id="deposit-amount"></div>
+        </div>
+        <div class="enter-text">Enter</div>
+        <div class="deposit-icon">+</div>
     </div>
-
+    <div id="ton-connect" class="go1487791704" data-tc-text="true">Connect Wallet</div>
     <div class="menu">
         <button id="home-btn">Home</button>
         <button id="wallet-btn">Wallet</button>
@@ -181,13 +210,13 @@
             document.querySelector('.app').style.display = 'block';
             localStorage.setItem('visited', 'true');
             document.getElementById('balance').textContent = balance;
-            document.getElementById('deposit-amount').textContent = balance;
+            document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
         }, 9000);
     } else {
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.app').style.display = 'block';
         document.getElementById('balance').textContent = balance;
-        document.getElementById('deposit-amount').textContent = balance;
+        document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
     }
 
     document.getElementById('home-btn').addEventListener('click', () => {
@@ -196,15 +225,15 @@
 
     document.getElementById('wallet-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.add('active');
-        document.getElementById('wallet-balance').textContent = balance;
+        document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
     });
 
-    document.getElementById('link-wallet').addEventListener('click', async () => {
+    document.getElementById('ton-connect').addEventListener('click', async () => {
         try {
             const connectedWallet = await tonConnectUI.connectWallet();
             console.log('Кошелек подключен:', connectedWallet);
             if (connectedWallet) {
-                document.getElementById('link-wallet').textContent = connectedWallet.account.address;
+                document.getElementById('ton-connect').textContent = connectedWallet.account.address;
             }
         } catch (error) {
             console.error("Ошибка при подключении кошелька:", error);
@@ -213,7 +242,7 @@
 
     tonConnectUI.onStatusChange((wallet) => {
         if (wallet) {
-            document.getElementById('link-wallet').textContent = wallet.account.address;
+            document.getElementById('ton-connect').textContent = wallet.account.address;
         }
     });
 
