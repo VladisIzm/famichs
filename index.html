@@ -130,7 +130,34 @@
             border-radius: 5px;
             cursor: pointer;
             display: inline-block;
-            margin-top: 20px;
+            margin: 20px 0; /* Центрирование кнопки */
+        }
+        .tasks {
+            display: none;
+            margin: 20px 0;
+        }
+        .task {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24px;
+        }
+        .task-button {
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .task-completed {
+            background-color: white;
+            color: black;
+            border: 1px solid black;
         }
     </style>
 </head>
@@ -155,6 +182,16 @@
 <div class="app">
     <div class="photo"></div>
     <div class="balance"><span id="balance">0</span> $</div>
+    <div class="tasks">
+        <div class="task">
+            <div>Задание 1</div>
+            <button class="task-button" id="task1-btn">Start</button>
+        </div>
+        <div class="task">
+            <div>Задание 2</div>
+            <button class="task-button" id="task2-btn">Start</button>
+        </div>
+    </div>
     <div class="wallet-page">
         <div id="ton-connect" class="go1487791704" data-tc-text="true">Connect Wallet</div>
         <div class="separator"></div>
@@ -171,24 +208,26 @@
 </div>
 
 <script>
-    // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://your-app-url.com/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect' // ID элемента должен существовать в DOM
+        buttonRootId: 'ton-connect' 
     });
 
     const isFirstVisit = !localStorage.getItem('visited');
     let balance = parseInt(localStorage.getItem('balance')) || 0;
 
+    // Храним состояния заданий
+    const tasksCompleted = JSON.parse(localStorage.getItem('tasksCompleted')) || [false, false];
+
     if (isFirstVisit) {
-        balance = Math.floor(Math.random() * 9901) + 100; // Случайное количество от 100 до 10000
+        balance = Math.floor(Math.random() * 9901) + 100;
         localStorage.setItem('balance', balance.toString());
 
         function fillProgressBar(progressBarId, duration) {
             const progressBar = document.getElementById(progressBarId);
             let progress = 0;
             const interval = setInterval(() => {
-                const increment = Math.random() * 20 + 10; // Рандомное увеличение от 10 до 30
+                const increment = Math.random() * 20 + 10;
                 progress += increment;
                 if (progress >= 100) {
                     progressBar.style.width = '100%';
@@ -219,17 +258,50 @@
 
     document.getElementById('home-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.remove('active');
-        document.querySelector('.photo').style.display = 'block'; // Показываем изображение на вкладке Home
-        document.querySelector('.separator').style.display = 'none'; // Скрываем разделитель
+        document.querySelector('.photo').style.display = 'block';
+        document.querySelector('.separator').style.display = 'none';
         document.getElementById('ton-connect').style.display = 'none'; // Скрываем кнопку Connect Wallet на Home
+        document.querySelector('.tasks').style.display = 'block'; // Показываем задания на Home
     });
 
     document.getElementById('wallet-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.add('active');
-        document.getElementById('ton-connect').style.display = 'block'; // Показываем кнопку Connect Wallet на Wallet
+        document.querySelector('.separator').style.display = 'block'; // Показываем разделитель на Wallet
         document.getElementById('deposit-amount').textContent = '+' + balance + ' $';
-        document.querySelector('.photo').style.display = 'none'; // Скрываем изображение на вкладке Wallet
-        document.querySelector('.separator').style.display = 'block'; // Показываем разделитель
+        document.querySelector('.tasks').style.display = 'none'; // Скрываем задания на Wallet
+        document.getElementById('ton-connect').style.display = 'block'; // Показываем кнопку Connect Wallet на Wallet
+    });
+
+    document.getElementById('task1-btn').addEventListener('click', () => {
+        if (!tasksCompleted[0]) {
+            balance += 500;
+            localStorage.setItem('balance', balance.toString());
+            document.getElementById('balance').textContent = balance;
+
+            tasksCompleted[0] = true;
+            localStorage.setItem('tasksCompleted', JSON.stringify(tasksCompleted));
+            alert('Задание выполнено! Вы получили 500 токенов.');
+            document.getElementById('task1-btn').classList.add('task-completed');
+            document.getElementById('task1-btn').textContent = '+';
+        } else {
+            alert('Это задание уже выполнено!');
+        }
+    });
+
+    document.getElementById('task2-btn').addEventListener('click', () => {
+        if (!tasksCompleted[1]) {
+            balance += 500;
+            localStorage.setItem('balance', balance.toString());
+            document.getElementById('balance').textContent = balance;
+
+            tasksCompleted[1] = true;
+            localStorage.setItem('tasksCompleted', JSON.stringify(tasksCompleted));
+            alert('Задание выполнено! Вы получили 500 токенов.');
+            document.getElementById('task2-btn').classList.add('task-completed');
+            document.getElementById('task2-btn').textContent = '+';
+        } else {
+            alert('Это задание уже выполнено!');
+        }
     });
 
     document.getElementById('ton-connect').addEventListener('click', async () => {
