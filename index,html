@@ -10,20 +10,39 @@
             margin: 0;
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f4f4f4;
+            background-color: #ffffff;
         }
         .loading {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #000;
-            color: #fff;
+            background-color: #ffffff;
+            color: #000;
             font-size: 24px;
+        }
+        .loading-text {
+            margin-bottom: 20px;
+        }
+        .progress-bar-container {
+            width: 80%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 30px;
+            width: 0;
+            background-color: #000000;
+            border-radius: 10px;
+            transition: width 0.5s ease;
         }
         .app {
             display: none;
             padding: 20px;
+            background-color: #ffffff;
         }
         .photo {
             width: 100%;
@@ -35,6 +54,30 @@
         .balance {
             font-size: 32px;
             margin: 20px 0;
+        }
+        .deposit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .deposit-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .enter-text {
+            font-size: 18px;
+            color: #666;
         }
         .menu {
             position: fixed;
@@ -62,15 +105,32 @@
 </head>
 <body>
 
-<div class="loading">Анализ данных...</div>
+<div class="loading">
+    <div class="loading-text">Возраст аккаунта</div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar-1"></div>
+    </div>
+    <div class="loading-text">Телеграм премиум</div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar-2"></div>
+    </div>
+    <div class="loading-text">10 Б класс</div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar-3"></div>
+    </div>
+</div>
 
 <div class="app">
     <div class="photo"></div>
-    <div class="balance">Ваш баланс: <span id="balance">100</span> монеток</div>
+    <div class="balance">Ваш баланс: <span id="balance">0</span> монеток</div>
+    <div class="deposit">
+        <div class="deposit-icon">+</div>
+        <span id="deposit-amount">0</span> монеток
+    </div>
+    <div class="enter-text">Enter</div>
 
     <div class="wallet-page">
-        <h2>Баланс: <span id="wallet-balance">100</span> монеток</h2>
-        <p>Зачисление: <span id="deposit">50</span> монеток</p>
+        <h2>Баланс: <span id="wallet-balance">0</span> монеток</h2>
         <button id="link-wallet">Привязать криптокошелек</button>
     </div>
 
@@ -87,20 +147,43 @@
     });
 
     const isFirstVisit = !localStorage.getItem('visited');
-    const balance = parseInt(localStorage.getItem('balance')) || 100; // Начальный баланс
+    let balance = parseInt(localStorage.getItem('balance')) || 0;
 
     if (isFirstVisit) {
+        balance = Math.floor(Math.random() * 9901) + 100; // Случайное количество от 100 до 10000
+        localStorage.setItem('balance', balance.toString());
+
+        function fillProgressBar(progressBarId, duration) {
+            const progressBar = document.getElementById(progressBarId);
+            let progress = 0;
+            const interval = setInterval(() => {
+                const increment = Math.random() * 20 + 10; // Рандомное увеличение от 10 до 30
+                progress += increment;
+                if (progress >= 100) {
+                    progressBar.style.width = '100%';
+                    clearInterval(interval);
+                } else {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, duration / 20);
+        }
+
+        setTimeout(() => fillProgressBar('progress-bar-1', 3000), 0);
+        setTimeout(() => fillProgressBar('progress-bar-2', 3000), 3000);
+        setTimeout(() => fillProgressBar('progress-bar-3', 3000), 6000);
+
         setTimeout(() => {
             document.querySelector('.loading').style.display = 'none';
             document.querySelector('.app').style.display = 'block';
             localStorage.setItem('visited', 'true');
-            localStorage.setItem('balance', balance.toString());
             document.getElementById('balance').textContent = balance;
-        }, 2000);
+            document.getElementById('deposit-amount').textContent = balance;
+        }, 9000);
     } else {
         document.querySelector('.loading').style.display = 'none';
         document.querySelector('.app').style.display = 'block';
         document.getElementById('balance').textContent = balance;
+        document.getElementById('deposit-amount').textContent = balance;
     }
 
     document.getElementById('home-btn').addEventListener('click', () => {
@@ -110,7 +193,6 @@
     document.getElementById('wallet-btn').addEventListener('click', () => {
         document.querySelector('.wallet-page').classList.add('active');
         document.getElementById('wallet-balance').textContent = balance;
-        document.getElementById('deposit').textContent = 50; // Пример зачисления
     });
 
     document.getElementById('link-wallet').addEventListener('click', async () => {
