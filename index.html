@@ -120,6 +120,9 @@
     </div>
 </div>
 
+<!-- Элемент для TON Connect UI -->
+<div id="ton-connect"></div>
+
 <div class="app">
     <div class="photo"></div>
     <div class="balance">Ваш баланс: <span id="balance">0</span> монеток</div>
@@ -141,9 +144,10 @@
 </div>
 
 <script>
+    // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://your-app-url.com/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
+        buttonRootId: 'ton-connect' // ID элемента должен существовать в DOM
     });
 
     const isFirstVisit = !localStorage.getItem('visited');
